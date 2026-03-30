@@ -1,0 +1,29 @@
+{
+  "name": "agent_npu",
+  "image": "agent_npu_cann:8.5.0",
+  "workspaceFolder": "/workdir",
+  "runArgs": [
+    "--ipc=host",
+    "--privileged",
+    "--device=/dev/davinci0",
+    "--device=/dev/davinci1",
+    "--device=/dev/davinci2",
+    "--device=/dev/davinci3",
+    "--device=/dev/davinci4",
+    "--device=/dev/davinci5",
+    "--device=/dev/davinci6",
+    "--device=/dev/davinci7",
+    "--device=/dev/davinci_manager",
+    "--device=/dev/devmm_svm",
+    "--device=/dev/hisi_hdc"
+  ],
+  "mounts": [
+    "type=bind,source=/usr/local/bin/npu-smi,target=/usr/local/bin/npu-smi,readonly",
+    "type=bind,source=/usr/local/Ascend/driver,target=/usr/local/Ascend/driver,readonly",
+    "type=bind,source=/etc/ascend_install.info,target=/etc/ascend_install.info,readonly",
+    "type=bind,source=${localEnv:HOME}/work_code/workdir_for_agent,target=/workdir"
+  ],
+  "containerEnv": {
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
+  }
+}

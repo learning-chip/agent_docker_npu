@@ -1,4 +1,4 @@
-# Set up Cursor & Claude Code agent inside docker-ascend container on remote NPU server
+# Set up Cursor & Claude Code agent inside Ascend-Docker container on remote NPU server
 
 Goal of this guide:
 - Give the agent access to NPU devices for autonomous "edit-compile-run" cycles

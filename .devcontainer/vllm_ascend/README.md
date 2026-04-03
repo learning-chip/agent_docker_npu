@@ -20,8 +20,8 @@ docker run --rm -it --ipc=host --privileged \
     -v /usr/local/bin/npu-smi:/usr/local/bin/npu-smi:ro \
     -v /usr/local/Ascend/driver:/usr/local/Ascend/driver:ro \
     -v /etc/ascend_install.info:/etc/ascend_install.info:ro \
+    -v /scratch/model_weights:/scratch/model_weights:ro \
     -v $HOME/work_code/workdir_for_agent:/workdir \
-    -v /scratch/model_weights:/scratch/model_weights \
     -w /workdir \
     vllm_ascend_dev:v0.18.0rc1 /bin/bash
 ```

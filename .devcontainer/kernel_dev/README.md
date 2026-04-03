@@ -1,3 +1,5 @@
+Docker image for NPU kernel development
+
 ## Build image
 
 ```bash

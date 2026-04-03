@@ -22,6 +22,6 @@
     "type=bind,source=/usr/local/Ascend/driver,target=/usr/local/Ascend/driver,readonly",
     "type=bind,source=/etc/ascend_install.info,target=/etc/ascend_install.info,readonly",
     "type=bind,source=/scratch/model_weights,target=/scratch/model_weights,readonly",
-    "type=bind,source=${localEnv:HOME}/work_code/workdir_for_vllm_ascend,target=/workdir" 
+    "type=bind,source=${localEnv:HOME}/work_code/workdir_for_agent,target=/workdir" 
   ]
 }

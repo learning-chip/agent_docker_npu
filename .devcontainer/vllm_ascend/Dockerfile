@@ -1,0 +1,24 @@
+FROM quay.io/ascend/vllm-ascend:v0.18.0rc1
+
+WORKDIR /sources
+
+#  ==== tilelang-ascend install ====
+# (pin commit on 2026/04/03) https://github.com/tile-ai/tilelang-ascend/commit/3405ad8c03aa0d5de9423db6634a9a37725604b0
+ARG TILELANG_ASCEND_COMMIT=3405ad8c03aa0d5de9423db6634a9a37725604b0
+RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
+RUN cd /sources/tilelang-ascend && git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
+RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
+#  ==== end of tilelang-ascend install ====
+
+# ==== pto dependencies ====
+# mirros https://github.com/huawei-csl/pto-dsl/blob/main/docker/Dockerfile
+
+# certain operations need latest isa header, not CANN 8.5.0 default
+# (pin commit on 2026/03/16)
+ARG PTOISA_COMMIT=313817be696792a4e16a7ea5994ec98e34391613
+WORKDIR /sources
+RUN git clone https://gitcode.com/cann/pto-isa.git \
+    && cd pto-isa && git checkout $PTOISA_COMMIT
+#  ==== end of pto dependencies =====
+
+WORKDIR /sources

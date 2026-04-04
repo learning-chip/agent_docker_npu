@@ -7,10 +7,13 @@ WORKDIR /sources
 ARG TILELANG_ASCEND_COMMIT=3405ad8c03aa0d5de9423db6634a9a37725604b0
 RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
 WORKDIR /sources/tilelang-ascend
-RUN git checkout $TILELANG_ASCEND_COMMIT
-# RUN bash install_ascend.sh
-# TODO: cmake error, to debug
-# RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
+# temporary fix until https://github.com/tile-ai/tilelang-ascend/pull/771 merged
+RUN git checkout $TILELANG_ASCEND_COMMIT \
+    && sed -i '/echo "set(USE_ASCEND ON)" >> config.cmake/a echo '\''set(USE_GTEST OFF)'\'' >> config.cmake' install_ascend.sh \
+    && unset OMP_NUM_THREADS \
+    && bash install_ascend.sh
+# NOTE: vllm-ascend image sets OMP_NUM_THREADS to 1, leading to very slow build
+RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
 #  ==== end of tilelang-ascend install ====
 
 # ==== pto dependencies ====

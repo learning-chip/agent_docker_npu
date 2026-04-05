@@ -41,6 +41,7 @@ ARG PTOISA_COMMIT=6b97e220982e0743e00e815c4296b9a71a3f2162
 WORKDIR /sources
 RUN git clone https://gitcode.com/cann/pto-isa.git \
     && cd pto-isa && git checkout $PTOISA_COMMIT
+ENV PTO_LIB_PATH=/sources/pto-isa/
 
 # ARG ARCH=x86_64
 ARG ARCH=aarch64

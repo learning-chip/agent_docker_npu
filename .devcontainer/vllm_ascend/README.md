@@ -23,5 +23,6 @@ docker run --rm -it --ipc=host --privileged \
     -v /scratch/model_weights:/scratch/model_weights:ro \
     -v $HOME/work_code/workdir_for_agent:/workdir \
     -w /workdir \
+    --name vllm_cursor_cli
     vllm_ascend_dev:v0.18.0rc1 /bin/bash
 ```

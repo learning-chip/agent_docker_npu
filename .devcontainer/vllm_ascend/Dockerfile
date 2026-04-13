@@ -2,6 +2,12 @@ FROM quay.io/ascend/vllm-ascend:v0.18.0rc1
 
 WORKDIR /sources
 
+# ==== install cursor CLI ====
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://cursor.sh/install-cli | bash \
+    && ln -sf /root/.cursor/bin/cursor /usr/local/bin/cursor
+# ==== end cursor CLI install ====
+
 #  ==== tilelang-ascend install ====
 # (pin commit on 2026/04/03) https://github.com/tile-ai/tilelang-ascend/commit/3405ad8c03aa0d5de9423db6634a9a37725604b0
 ARG TILELANG_ASCEND_COMMIT=3405ad8c03aa0d5de9423db6634a9a37725604b0

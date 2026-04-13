@@ -4,8 +4,8 @@ WORKDIR /sources
 
 # ==== install cursor CLI ====
 RUN apt-get update && apt-get install -y curl \
-    && curl -fsSL https://cursor.sh/install-cli | bash \
-    && ln -sf /root/.cursor/bin/cursor /usr/local/bin/cursor
+    && curl -fsSL https://cursor.com/install | bash \
+    && ln -sf /root/.local/bin/agent /usr/local/bin/agent
 # ==== end cursor CLI install ====
 
 #  ==== tilelang-ascend install ====

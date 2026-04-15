@@ -2,6 +2,10 @@ FROM quay.io/ascend/vllm-ascend:v0.18.0rc1
 
 WORKDIR /sources
 
+# NOTE: vllm-ascend image sets OMP_NUM_THREADS to 1, leading to very slow build
+# here use a better default
+ENV OMP_NUM_THREADS=10
+
 # ==== install cursor CLI ====
 RUN apt-get update && apt-get install -y curl \
     && curl -fsSL https://cursor.com/install | bash \
@@ -18,7 +22,6 @@ RUN git checkout $TILELANG_ASCEND_COMMIT \
     && sed -i '/echo "set(USE_ASCEND ON)" >> config.cmake/a echo '\''set(USE_GTEST OFF)'\'' >> config.cmake' install_ascend.sh \
     && unset OMP_NUM_THREADS \
     && bash install_ascend.sh
-# NOTE: vllm-ascend image sets OMP_NUM_THREADS to 1, leading to very slow build
 RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
 #  ==== end of tilelang-ascend install ====
 

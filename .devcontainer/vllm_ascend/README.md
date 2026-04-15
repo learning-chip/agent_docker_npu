@@ -3,7 +3,7 @@ Docker image for vllm-ascend inference
 ## Build image
 
 ```bash
-docker build --no-cache -t vllm_ascend_dev:v0.18.0rc1 .
+docker build -t vllm_ascend_dev:v0.18.0rc1 .
 ```
 
 ## Run container directly (optional)

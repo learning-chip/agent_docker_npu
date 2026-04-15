@@ -2,10 +2,6 @@ FROM quay.io/ascend/vllm-ascend:v0.18.0rc1
 
 WORKDIR /sources
 
-# NOTE: vllm-ascend image sets OMP_NUM_THREADS to 1, leading to very slow build
-# here use a better default
-ENV OMP_NUM_THREADS=10
-
 # ==== install cursor CLI ====
 RUN apt-get update && apt-get install -y curl \
     && curl -fsSL https://cursor.com/install | bash \
@@ -35,5 +31,9 @@ RUN git clone https://gitcode.com/cann/pto-isa.git \
     && cd pto-isa && git checkout $PTOISA_COMMIT
 ENV PTO_LIB_PATH=/sources/pto-isa/
 #  ==== end of pto dependencies =====
+
+# NOTE: vllm-ascend image sets OMP_NUM_THREADS to 1, leading to very slow build
+# here use a better default
+ENV OMP_NUM_THREADS=16
 
 WORKDIR /sources

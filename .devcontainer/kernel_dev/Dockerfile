@@ -31,27 +31,37 @@ RUN cd /sources/tilelang-ascend && git checkout $TILELANG_ASCEND_COMMIT && bash 
 RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
 #  ==== end of tilelang-ascend install ====
 
+# ==== install cursor CLI ====
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://cursor.com/install | bash \
+    && ln -sf /root/.local/bin/agent /usr/local/bin/agent
+# ==== end cursor CLI install ====
 
-# ==== pto-dsl dependencies ====
-# mirros https://github.com/huawei-csl/pto-dsl/blob/main/docker/Dockerfile
+# ==== pto dependencies ====
 
 # certain operations need latest isa header, not CANN 8.5.0 default
-# (pin commit on 2026/04/03) https://gitcode.com/cann/pto-isa/commit/6b97e220982e0743e00e815c4296b9a71a3f2162?ref=master
-ARG PTOISA_COMMIT=6b97e220982e0743e00e815c4296b9a71a3f2162
+# header on 2026/04/20
+ARG PTOISA_COMMIT=01666f3b386f296c95e6e05825fe63b8e6bb4ef4
 WORKDIR /sources
 RUN git clone https://gitcode.com/cann/pto-isa.git \
     && cd pto-isa && git checkout $PTOISA_COMMIT
-ENV PTO_LIB_PATH=/sources/pto-isa/
+
+# cache above layers unrelated to ptoas version change
+
+# change this ununsed arg if need to force rebuild later lines
+ARG CACHE_BURST=1
 
 # ARG ARCH=x86_64
 ARG ARCH=aarch64
 ARG RELEASE_REPO=zhangstevenunity/PTOAS
-ARG RELEASE_VER=0.9
+ARG RELEASE_VER=0.29
 ARG RELEASE_TAG=v${RELEASE_VER}
 ARG WHEEL_NAME=ptoas-${RELEASE_VER}-cp311-none-manylinux_2_34_${ARCH}.whl
 ARG CLI_TAR_NAME=ptoas-bin-${ARCH}.tar.gz
 
 WORKDIR /installers/
+
+# download assets from https://github.com/huawei-csl/PTOAS/releases
 RUN wget https://github.com/${RELEASE_REPO}/releases/download/${RELEASE_TAG}/${WHEEL_NAME}
 RUN pip install ./${WHEEL_NAME}
 RUN python -c "import mlir.ir; from mlir.dialects import pto"
@@ -64,6 +74,16 @@ RUN mkdir $CLI_DIR && tar zxf ./${CLI_TAR_NAME} -C $CLI_DIR
 RUN chmod +x $CLI_DIR/bin/ptoas
 ENV PATH=$CLI_DIR/bin:$PATH
 ENV LD_LIBRARY_PATH=$CLI_DIR/lib:$LD_LIBRARY_PATH
-# ==== end of pto-dsl dependencies =====
+
+# test python binding + cli usage
+WORKDIR /tests/
+RUN wget https://raw.githubusercontent.com/${RELEASE_REPO}/refs/tags/${RELEASE_TAG}/test/samples/Abs/abs.py
+RUN wget https://raw.githubusercontent.com/${RELEASE_REPO}/refs/tags/${RELEASE_TAG}/test/samples/MatMul/tmatmulk.py
+
+RUN python ./tmatmulk.py > ./tmatmulk.pto
+RUN ptoas ./tmatmulk.pto -o ./tmatmulk.cpp
+
+RUN python ./abs.py > ./abs.pto
+RUN ptoas --enable-insert-sync ./abs.pto -o ./abs.cpp
 
 WORKDIR /sources

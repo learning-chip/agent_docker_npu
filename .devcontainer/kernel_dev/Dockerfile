@@ -24,10 +24,13 @@ ARG CACHE_BURST=1
 WORKDIR /sources
 
 #  ==== tilelang-ascend install ====
-# (pin commit on 2026/04/03) https://github.com/tile-ai/tilelang-ascend/commit/3405ad8c03aa0d5de9423db6634a9a37725604b0
-ARG TILELANG_ASCEND_COMMIT=3405ad8c03aa0d5de9423db6634a9a37725604b0
+# (pin commit on 2026/04/24) https://github.com/tile-ai/tilelang-ascend/commit/fc153041ae862b297e744f7a80d242d8041b07e6
+# Includes DS-V4 kernel https://github.com/tile-ai/tilelang-ascend/pull/917
+ARG TILELANG_ASCEND_COMMIT=fc153041ae862b297e744f7a80d242d8041b07e6
 RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
-RUN cd /sources/tilelang-ascend && git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
+WORKDIR /sources/tilelang-ascend
+
+RUN git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
 RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
 #  ==== end of tilelang-ascend install ====
 

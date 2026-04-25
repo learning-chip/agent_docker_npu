@@ -1,5 +1,9 @@
 FROM quay.io/ascend/vllm-ascend:v0.18.0rc1
 
+# NOTE: vllm-ascend image sets OMP_NUM_THREADS to 1, leading to very slow build
+# here use a better default
+ENV OMP_NUM_THREADS=16
+
 WORKDIR /sources
 
 # ==== install cursor CLI ====
@@ -9,21 +13,16 @@ RUN apt-get update && apt-get install -y curl \
 # ==== end cursor CLI install ====
 
 #  ==== tilelang-ascend install ====
-# (pin commit on 2026/04/03) https://github.com/tile-ai/tilelang-ascend/commit/3405ad8c03aa0d5de9423db6634a9a37725604b0
-ARG TILELANG_ASCEND_COMMIT=3405ad8c03aa0d5de9423db6634a9a37725604b0
+# (pin commit on 2026/04/24) https://github.com/tile-ai/tilelang-ascend/commit/fc153041ae862b297e744f7a80d242d8041b07e6
+# Includes DS-V4 kernel https://github.com/tile-ai/tilelang-ascend/pull/917
+# Include varlen GDN kernel https://github.com/tile-ai/tilelang-ascend/pull/875
+ARG TILELANG_ASCEND_COMMIT=fc153041ae862b297e744f7a80d242d8041b07e6
 RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
 WORKDIR /sources/tilelang-ascend
-# temporary fix until https://github.com/tile-ai/tilelang-ascend/pull/771 merged
-RUN git checkout $TILELANG_ASCEND_COMMIT \
-    && sed -i '/echo "set(USE_ASCEND ON)" >> config.cmake/a echo '\''set(USE_GTEST OFF)'\'' >> config.cmake' install_ascend.sh \
-    && unset OMP_NUM_THREADS \
-    && bash install_ascend.sh
+
+RUN git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
 RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
 #  ==== end of tilelang-ascend install ====
-
-# NOTE: vllm-ascend image sets OMP_NUM_THREADS to 1, leading to very slow build
-# here use a better default
-ENV OMP_NUM_THREADS=16
 
 # ==== pto dependencies ====
 

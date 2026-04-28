@@ -33,6 +33,8 @@ WORKDIR /sources
 RUN git clone https://gitcode.com/cann/pto-isa.git \
     && cd pto-isa && git checkout $PTOISA_COMMIT
 
+ENV PTO_LIB_PATH=/sources/pto-isa
+
 # cache above layers unrelated to ptoas version change
 
 # change this ununsed arg if need to force rebuild later lines
@@ -40,8 +42,8 @@ ARG CACHE_BURST=1
 
 # ARG ARCH=x86_64
 ARG ARCH=aarch64
-ARG RELEASE_REPO=zhangstevenunity/PTOAS
-ARG RELEASE_VER=0.29
+ARG RELEASE_REPO=hw-native-sys/PTOAS
+ARG RELEASE_VER=0.31
 ARG RELEASE_TAG=v${RELEASE_VER}
 ARG WHEEL_NAME=ptoas-${RELEASE_VER}-cp311-none-manylinux_2_34_${ARCH}.whl
 ARG CLI_TAR_NAME=ptoas-bin-${ARCH}.tar.gz

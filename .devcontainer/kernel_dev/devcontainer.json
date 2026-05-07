@@ -1,6 +1,6 @@
 {
-  "name": "agent_npu_fa_hack",
-  "image": "agent_npu_cann:fa_hack",
+  "name": "agent_npu_kernel",
+  "image": "agent_npu_cann:8.5.0",
   "workspaceFolder": "/workdir",
   "runArgs": [
     "--ipc=host",

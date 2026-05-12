@@ -10,10 +10,12 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir torch==2.9.0 --index-url https://download.pytorch.org/whl/cpu \
     && pip install --no-cache-dir torch-npu==2.9.0.post2 \
     && pip install --no-cache-dir numpy pyyaml
-    
+
 # extra util
+# LLVM/MLIR Python bindings are not yet compatible with pybind11 3.x
+# (see pybind11 static_assert on def_property + keep_alive).
 RUN pip install --no-cache-dir \
-    pytest pybind11 nanobind setuptools wheel auditwheel \
+    pytest 'pybind11<3' nanobind setuptools wheel auditwheel \
     ipython jupyterlab matplotlib pandas
 
 # cursor CLI

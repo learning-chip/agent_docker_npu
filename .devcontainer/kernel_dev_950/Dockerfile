@@ -47,7 +47,7 @@ RUN cmake -C /tmp/LinuxHardeningCache.cmake -G Ninja -S llvm -B $LLVM_BUILD_DIR 
     -DLLVM_ENABLE_PROJECTS="mlir;clang" \
     -DBUILD_SHARED_LIBS=ON \
     -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
-    -DPython3_EXECUTABLE=${PY_PATH}/bin/python \
+    -DPython3_EXECUTABLE="$(which python)" \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_TARGETS_TO_BUILD="host"
 

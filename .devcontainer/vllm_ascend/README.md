@@ -3,7 +3,7 @@ Docker image for vllm-ascend inference
 ## Build image
 
 ```bash
-docker build -t vllm_ascend_dev:v0.18.0rc1 .
+docker build -t vllm_ascend_dev:v0.19.1rc1 .
 ```
 
 ## Run container directly (optional)
@@ -24,5 +24,5 @@ docker run --rm -it --ipc=host --privileged \
     -v $HOME/work_code/workdir_for_agent:/workdir \
     -w /workdir \
     --name vllm_cursor_cli \
-    vllm_ascend_dev:v0.18.0rc1 /bin/bash
+    vllm_ascend_dev:v0.19.1rc1 /bin/bash
 ```

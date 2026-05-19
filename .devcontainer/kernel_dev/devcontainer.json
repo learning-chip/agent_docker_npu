@@ -1,6 +1,6 @@
 {
   "name": "agent_npu_kernel",
-  "image": "agent_npu_cann:8.5.0",
+  "image": "agent_npu_cann:9.0.0",
   "workspaceFolder": "/workdir",
   "runArgs": [
     "--ipc=host",
@@ -22,8 +22,5 @@
     "type=bind,source=/usr/local/Ascend/driver,target=/usr/local/Ascend/driver,readonly",
     "type=bind,source=/etc/ascend_install.info,target=/etc/ascend_install.info,readonly",
     "type=bind,source=${localEnv:HOME}/work_code/workdir_for_agent,target=/workdir"
-  ],
-  "containerEnv": {
-    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
-  }
+  ]
 }

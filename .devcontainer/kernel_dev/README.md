@@ -3,7 +3,7 @@ Docker image for NPU kernel development
 ## Build image
 
 ```bash
-docker build -t agent_npu_cann:8.5.0 .
+docker build -t agent_npu_cann:9.0.0 .
 ```
 
 ## Run container directly (optional)
@@ -24,6 +24,5 @@ docker run --rm -it --ipc=host --privileged \
     -v /etc/ascend_install.info:/etc/ascend_install.info:ro \
     -v $HOST_MOUNT_DIR:/workdir \
     -w /workdir \
-    -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
-    agent_npu_cann:8.5.0 /bin/bash
+    agent_npu_cann:9.0.0 /bin/bash
 ```

@@ -46,11 +46,8 @@ RUN curl -fsSL https://repo.huaweicloud.com/python/3.11.15/Python-3.11.15.tgz -o
 # Stage 2: Install CANN
 FROM python-installer AS cann-installer
 
-ARG TARGETPLATFORM
-
 RUN apt-get update && apt-get install --no-install-recommends -y \
         git \
-        wget \
         gcc \
         g++ \
         make \
@@ -73,18 +70,11 @@ RUN pip install --no-cache-dir \
         attrs cython numpy decorator sympy cffi pyyaml pathlib2 \
         psutil protobuf==3.20 scipy requests absl-py
 
-# Note: Get the download link according to ARCH and download the installation package
-RUN ARCH=$(case "${TARGETPLATFORM}" in \
-        "linux/amd64") echo "x86_64" ;; \
-        "linux/arm64") echo "aarch64" ;; \
-        *) echo "Unsupported TARGETPLATFORM: ${TARGETPLATFORM}" && exit 1 ;; \
-    esac) && \
-    CANN_TOOLKIT_URL=https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%209.0.0/Ascend-cann-toolkit_9.0.0_linux-${ARCH}.run && \
-    CANN_OPS_URL=https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%209.0.0/Ascend-cann-950-ops_9.0.0_linux-${ARCH}.run && \
-    CANN_NNAL_URL=https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%209.0.0/Ascend-cann-nnal_9.0.0_linux-${ARCH}.run && \
-    wget --quiet --header="Referer: https://www.hiascend.com/" ${CANN_TOOLKIT_URL} -O ~/Ascend-cann-toolkit.run && \
-    wget --quiet --header="Referer: https://www.hiascend.com/" ${CANN_OPS_URL} -O ~/Ascend-cann-ops.run && \
-    wget --quiet --header="Referer: https://www.hiascend.com/" ${CANN_NNAL_URL} -O ~/Ascend-cann-nnal.run
+# Note: Copy pre-downloaded installers from build context
+# cann_installers/ (default: /scratch/ascend-downloads/cann_installers/; see README.md)
+COPY cann_installers/Ascend-cann-toolkit_9.0.0-beta.1_linux-aarch64.run /root/Ascend-cann-toolkit.run
+COPY cann_installers/Ascend-cann-950-ops_9.0.0_linux-aarch64.run /root/Ascend-cann-ops.run
+COPY cann_installers/Ascend-cann-nnal_9.0.0-beta.1_linux-aarch64.run /root/Ascend-cann-nnal.run
 
 # Note: Install CANN Toolkit Development Kit Package
 RUN chmod +x ~/Ascend-cann-toolkit.run && \

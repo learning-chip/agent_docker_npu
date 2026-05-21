@@ -38,3 +38,9 @@ docker build \
 ```
 
 For aarch64 NPU hosts, the default platform is usually sufficient. For cross-builds, pass `--platform linux/arm64` (or `linux/amd64` once x86_64 installers are present in `cann_installers/`).
+
+## Further add ptoas dependencies
+
+```bash
+docker build -f Dockerfile.ptoas_deps -t agent_npu_cann_950:9.0.0.beta1 .
+```

@@ -100,7 +100,7 @@ ENV PATH=/usr/local/python3.11.15/bin:${PATH}
 ENV LD_LIBRARY_PATH=/usr/local/python3.11.15/lib:${LD_LIBRARY_PATH}
 
 # Note: Toolkit Environment variables, obtained from /usr/local/Ascend/ascend-toolkit/set_env.sh
-ENV ASCEND_TOOLKIT_HOME=/usr/local/Ascend/cann-9.0.0
+ENV ASCEND_TOOLKIT_HOME=/usr/local/Ascend/cann-9.0.0-beta.1
 ENV ASCEND_TOOLKIT_LATEST_HOME=/usr/local/Ascend/ascend-toolkit/latest
 
 ENV PYTHONPATH=${ASCEND_TOOLKIT_HOME}/python/site-packages:${ASCEND_TOOLKIT_HOME}/opp/built-in/op_impl/ai_core/tbe:$PYTHONPATH

@@ -1,7 +1,7 @@
 FROM quay.io/ascend/cann:9.0.0-910b-ubuntu22.04-py3.11
 
 RUN apt-get update && apt-get install -y \
-    wget curl git vim gawk \
+    wget curl git vim gawk ripgrep \
     ninja-build cmake ccache build-essential lld zip binutils patchelf chrpath \
     && rm -rf /var/lib/apt/lists/*
 

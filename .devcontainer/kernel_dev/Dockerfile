@@ -1,7 +1,7 @@
 FROM quay.io/ascend/cann:9.0.0-910b-ubuntu22.04-py3.11
 
 RUN apt-get update && apt-get install -y \
-    wget curl git vim \
+    wget curl git vim gawk \
     ninja-build cmake ccache build-essential lld zip binutils patchelf chrpath \
     && rm -rf /var/lib/apt/lists/*
 
@@ -19,19 +19,20 @@ RUN pip install --no-cache-dir \
     ipython jupyterlab matplotlib pandas
 
 # cursor CLI
-RUN apt-get update && apt-get install -y curl \
-    && curl -fsSL https://cursor.com/install | bash \
+RUN curl -fsSL https://cursor.com/install | bash \
     && ln -sf /root/.local/bin/agent /usr/local/bin/agent
 
 # ChatGPT Code CLI https://chatgpt.com/codex/
-RUN curl -fsSL https://chatgpt.com/codex/install.sh 
+RUN CODEX_NON_INTERACTIVE=1 curl -fsSL https://chatgpt.com/codex/install.sh | bash \
+    && ln -sf /root/.local/bin/codex /usr/local/bin/codex
+RUN which codex && codex --version
 
 # Kimi Code CLI https://github.com/MoonshotAI/kimi-cli
-RUN curl -LsSf https://code.kimi.com/install.sh
+RUN curl -LsSf https://code.kimi.com/install.sh | bash
+RUN which kimi && kimi --version
 
 # github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-RUN apt update && apt install wget -y \
-	&& mkdir -p -m 755 /etc/apt/keyrings \
+RUN mkdir -p -m 755 /etc/apt/keyrings \
 	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
 	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
@@ -64,8 +65,8 @@ RUN ninja -C $LLVM_BUILD_DIR
 WORKDIR /sources/
 
 #  ==== tilelang-ascend install ====
-# (pin commit on 2026/05/19) https://github.com/tile-ai/tilelang-ascend/commit/1e763f49e9c76e07c5537176aab45cea51bebce6
-ARG TILELANG_ASCEND_COMMIT=1e763f49e9c76e07c5537176aab45cea51bebce6
+# (pin commit on 2026/05/28) https://github.com/tile-ai/tilelang-ascend/commit/5cdf29200ca8b54a5cc4c98382b434d092ee8e2b
+ARG TILELANG_ASCEND_COMMIT=5cdf29200ca8b54a5cc4c98382b434d092ee8e2b
 RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
 WORKDIR /sources/tilelang-ascend
 

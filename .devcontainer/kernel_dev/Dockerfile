@@ -23,6 +23,12 @@ RUN apt-get update && apt-get install -y curl \
     && curl -fsSL https://cursor.com/install | bash \
     && ln -sf /root/.local/bin/agent /usr/local/bin/agent
 
+# ChatGPT Code CLI https://chatgpt.com/codex/
+RUN curl -fsSL https://chatgpt.com/codex/install.sh 
+
+# Kimi Code CLI https://github.com/MoonshotAI/kimi-cli
+RUN curl -LsSf https://code.kimi.com/install.sh
+
 # github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
 RUN apt update && apt install wget -y \
 	&& mkdir -p -m 755 /etc/apt/keyrings \

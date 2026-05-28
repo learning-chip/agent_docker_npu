@@ -28,7 +28,10 @@ RUN CODEX_NON_INTERACTIVE=1 curl -fsSL https://chatgpt.com/codex/install.sh | ba
 RUN which codex && codex --version
 
 # Kimi Code CLI https://github.com/MoonshotAI/kimi-cli
-RUN curl -LsSf https://code.kimi.com/install.sh | bash
+# install.sh installs uv to ~/.local/bin; PATH must include it before the post-install check
+RUN export PATH="/root/.local/bin:${PATH}" \
+    && curl -LsSf https://code.kimi.com/install.sh | bash \
+    && ln -sf /root/.local/bin/kimi /usr/local/bin/kimi
 RUN which kimi && kimi --version
 
 # github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md

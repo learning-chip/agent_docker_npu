@@ -27,6 +27,14 @@ RUN CODEX_NON_INTERACTIVE=1 curl -fsSL https://chatgpt.com/codex/install.sh | ba
     && ln -sf /root/.local/bin/codex /usr/local/bin/codex
 RUN which codex && codex --version
 
+# Humanize skills for Codex https://github.com/PolyArch/humanize
+RUN tmp_dir="$(mktemp -d)" \
+    && git clone --depth 1 https://github.com/PolyArch/humanize.git "$tmp_dir/humanize" \
+    && "$tmp_dir/humanize/scripts/install-skills-codex.sh" \
+    && rm -rf "$tmp_dir"
+COPY codex/config.toml /root/.codex/config.toml
+RUN codex features enable codex_hooks
+
 # Kimi Code CLI https://github.com/MoonshotAI/kimi-cli
 # install.sh installs uv to ~/.local/bin; PATH must include it before the post-install check
 RUN export PATH="/root/.local/bin:${PATH}" \

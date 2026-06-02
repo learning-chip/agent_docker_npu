@@ -11,3 +11,7 @@ name = "rightcode"
 base_url = "https://right.codes/codex/v1"
 wire_api = "responses"
 requires_openai_auth = true
+
+# Required for Humanize native Stop hooks (Codex 0.136+; was codex_hooks in older Codex)
+[features]
+hooks = true

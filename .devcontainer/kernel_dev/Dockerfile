@@ -53,7 +53,18 @@ RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
 
 WORKDIR /sources/
 
+# github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+RUN mkdir -p -m 755 /etc/apt/keyrings \
+	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& mkdir -p -m 755 /etc/apt/sources.list.d \
+	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+	&& apt update \
+	&& apt install gh -y
+
 # ==== AI agent CLIs (install last for better layer caching) ====
+ENV CODEX_HOME=/root/.codex
 
 # cursor CLI
 RUN curl -fsSL https://cursor.com/install | bash \
@@ -67,6 +78,7 @@ RUN CODEX_NON_INTERACTIVE=1 CODEX_RELEASE=${CODEX_VERSION} curl -fsSL https://ch
 RUN export PATH="/root/.local/bin:${PATH}" \
     && which codex \
     && codex --version | grep -F "codex-cli ${CODEX_VERSION}"
+COPY codex/config.toml /root/.codex/config.toml
 
 # Humanize skills for Codex https://github.com/PolyArch/humanize
 # (pin commit on 2026/06/01) https://github.com/PolyArch/humanize/commit/0ec921a36b4365df503511c5567bbd3e02db0df5
@@ -78,9 +90,9 @@ RUN export PATH="/root/.local/bin:${PATH}" \
     && git -C "$tmp_dir/humanize" checkout ${HUMANIZE_COMMIT} \
     && sed -i 's/codex_hooks/hooks/g' "$tmp_dir/humanize/scripts/install-codex-hooks.sh" \
     && "$tmp_dir/humanize/scripts/install-skills-codex.sh" \
-    && rm -rf "$tmp_dir"
-COPY codex/config.toml /root/.codex/config.toml
-RUN export PATH="/root/.local/bin:${PATH}" && codex features enable hooks
+    && rm -rf "$tmp_dir" \
+    && test -d /root/.codex/skills/humanize \
+    && codex features list | grep -qE '^hooks[[:space:]]+stable[[:space:]]+true'
 
 # Kimi Code CLI https://github.com/MoonshotAI/kimi-cli
 # install.sh installs uv to ~/.local/bin; PATH must include it before the post-install check
@@ -98,13 +110,3 @@ RUN export PATH="/root/.local/bin:${PATH}" \
     && "$tmp_dir/humanize/scripts/install-skills-kimi.sh" \
     && rm -rf "$tmp_dir"
 RUN ls /root/.config/agents/skills
-
-# github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-RUN mkdir -p -m 755 /etc/apt/keyrings \
-	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-	&& mkdir -p -m 755 /etc/apt/sources.list.d \
-	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-	&& apt update \
-	&& apt install gh -y

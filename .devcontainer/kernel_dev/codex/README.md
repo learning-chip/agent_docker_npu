@@ -1,1 +1,1 @@
-TOML copied from https://docs.right.codes/docs/rc_cli_config/codex.html
+TOML adapted from https://docs.right.codes/docs/rc_cli_config/codex.html

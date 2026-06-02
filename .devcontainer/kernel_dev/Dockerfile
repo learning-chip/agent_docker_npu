@@ -18,44 +18,7 @@ RUN pip install --no-cache-dir \
     pytest 'pybind11<3' nanobind setuptools wheel auditwheel \
     ipython jupyterlab matplotlib pandas
 
-# cursor CLI
-RUN curl -fsSL https://cursor.com/install | bash \
-    && ln -sf /root/.local/bin/agent /usr/local/bin/agent
-
-# ChatGPT Code CLI https://chatgpt.com/codex/
-RUN CODEX_NON_INTERACTIVE=1 curl -fsSL https://chatgpt.com/codex/install.sh | bash \
-    && ln -sf /root/.local/bin/codex /usr/local/bin/codex
-RUN which codex && codex --version
-
-# Humanize skills for Codex https://github.com/PolyArch/humanize
-# Codex 0.136+ renamed codex_hooks -> hooks; patch installer until humanize upstream catches up.
-RUN export PATH="/root/.local/bin:${PATH}" \
-    && tmp_dir="$(mktemp -d)" \
-    && git clone --depth 1 https://github.com/PolyArch/humanize.git "$tmp_dir/humanize" \
-    && sed -i 's/codex_hooks/hooks/g' "$tmp_dir/humanize/scripts/install-codex-hooks.sh" \
-    && "$tmp_dir/humanize/scripts/install-skills-codex.sh" \
-    && rm -rf "$tmp_dir"
-COPY codex/config.toml /root/.codex/config.toml
-RUN export PATH="/root/.local/bin:${PATH}" && codex features enable hooks
-
-# Kimi Code CLI https://github.com/MoonshotAI/kimi-cli
-# install.sh installs uv to ~/.local/bin; PATH must include it before the post-install check
-RUN export PATH="/root/.local/bin:${PATH}" \
-    && curl -LsSf https://code.kimi.com/install.sh | bash \
-    && ln -sf /root/.local/bin/kimi /usr/local/bin/kimi
-RUN which kimi && kimi --version
-
-# github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-RUN mkdir -p -m 755 /etc/apt/keyrings \
-	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-	&& mkdir -p -m 755 /etc/apt/sources.list.d \
-	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-	&& apt update \
-	&& apt install gh -y
-
-# pre-built MLIR for ptoas & dsl development 
+# pre-built MLIR for ptoas & dsl development
 ENV WORKSPACE_DIR=/llvm-workspace
 ENV LLVM_SOURCE_DIR=$WORKSPACE_DIR/llvm-project
 ENV LLVM_BUILD_DIR=$LLVM_SOURCE_DIR/build-shared
@@ -89,3 +52,59 @@ RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
 #  ==== end of tilelang-ascend install ====
 
 WORKDIR /sources/
+
+# ==== AI agent CLIs (install last for better layer caching) ====
+
+# cursor CLI
+RUN curl -fsSL https://cursor.com/install | bash \
+    && ln -sf /root/.local/bin/agent /usr/local/bin/agent
+
+# ChatGPT Code CLI https://chatgpt.com/codex/
+# (pin version on 2026/06/01) verified with Humanize hooks via `hooks` feature
+ARG CODEX_VERSION=0.136.0
+RUN CODEX_NON_INTERACTIVE=1 CODEX_RELEASE=${CODEX_VERSION} curl -fsSL https://chatgpt.com/codex/install.sh | bash \
+    && ln -sf /root/.local/bin/codex /usr/local/bin/codex
+RUN export PATH="/root/.local/bin:${PATH}" \
+    && which codex \
+    && codex --version | grep -F "codex-cli ${CODEX_VERSION}"
+
+# Humanize skills for Codex https://github.com/PolyArch/humanize
+# (pin commit on 2026/06/01) https://github.com/PolyArch/humanize/commit/0ec921a36b4365df503511c5567bbd3e02db0df5
+# Codex 0.136+ renamed codex_hooks -> hooks; patch installer until humanize upstream catches up.
+ARG HUMANIZE_COMMIT=0ec921a36b4365df503511c5567bbd3e02db0df5
+RUN export PATH="/root/.local/bin:${PATH}" \
+    && tmp_dir="$(mktemp -d)" \
+    && git clone https://github.com/PolyArch/humanize.git "$tmp_dir/humanize" \
+    && git -C "$tmp_dir/humanize" checkout ${HUMANIZE_COMMIT} \
+    && sed -i 's/codex_hooks/hooks/g' "$tmp_dir/humanize/scripts/install-codex-hooks.sh" \
+    && "$tmp_dir/humanize/scripts/install-skills-codex.sh" \
+    && rm -rf "$tmp_dir"
+COPY codex/config.toml /root/.codex/config.toml
+RUN export PATH="/root/.local/bin:${PATH}" && codex features enable hooks
+
+# Kimi Code CLI https://github.com/MoonshotAI/kimi-cli
+# install.sh installs uv to ~/.local/bin; PATH must include it before the post-install check
+RUN export PATH="/root/.local/bin:${PATH}" \
+    && curl -LsSf https://code.kimi.com/install.sh | bash \
+    && ln -sf /root/.local/bin/kimi /usr/local/bin/kimi
+RUN which kimi && kimi --version
+
+# Humanize skills for Kimi https://github.com/PolyArch/humanize
+# (same pin as Codex install above)
+RUN export PATH="/root/.local/bin:${PATH}" \
+    && tmp_dir="$(mktemp -d)" \
+    && git clone https://github.com/PolyArch/humanize.git "$tmp_dir/humanize" \
+    && git -C "$tmp_dir/humanize" checkout ${HUMANIZE_COMMIT} \
+    && "$tmp_dir/humanize/scripts/install-skills-kimi.sh" \
+    && rm -rf "$tmp_dir"
+RUN ls /root/.config/agents/skills
+
+# github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+RUN mkdir -p -m 755 /etc/apt/keyrings \
+	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& mkdir -p -m 755 /etc/apt/sources.list.d \
+	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+	&& apt update \
+	&& apt install gh -y

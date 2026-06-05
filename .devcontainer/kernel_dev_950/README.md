@@ -26,3 +26,12 @@ docker run --rm -it --ipc=host --privileged \
     -w /workdir \
     agent_npu_cann_950:9.0.0 /bin/bash
 ```
+
+
+```bash
+# if just running host-side CA model, no need to mount device
+docker run --rm -it \
+    -v $HOME/work_code/workdir_for_agent:/workdir \
+    -w /workdir \
+    agent_npu_cann_950:9.0.0 /bin/bash
+```

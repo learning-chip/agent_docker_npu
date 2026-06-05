@@ -1,7 +1,7 @@
 FROM quay.io/ascend/cann:9.0.0-950-ubuntu22.04-py3.11
 
 RUN apt-get update && apt-get install -y \
-    wget curl git vim \
+    wget curl git vim gawk ripgrep \
     ninja-build cmake ccache build-essential lld zip binutils patchelf chrpath \
     && rm -rf /var/lib/apt/lists/*
 
@@ -18,23 +18,7 @@ RUN pip install --no-cache-dir \
     pytest 'pybind11<3' nanobind setuptools wheel auditwheel \
     ipython jupyterlab matplotlib pandas
 
-# cursor CLI
-RUN apt-get update && apt-get install -y curl \
-    && curl -fsSL https://cursor.com/install | bash \
-    && ln -sf /root/.local/bin/agent /usr/local/bin/agent
-
-# github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-RUN apt update && apt install wget -y \
-	&& mkdir -p -m 755 /etc/apt/keyrings \
-	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-	&& mkdir -p -m 755 /etc/apt/sources.list.d \
-	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-	&& apt update \
-	&& apt install gh -y
-
-# pre-built MLIR for ptoas & dsl development 
+# pre-built MLIR for ptoas & dsl development
 ENV WORKSPACE_DIR=/llvm-workspace
 ENV LLVM_SOURCE_DIR=$WORKSPACE_DIR/llvm-project
 ENV LLVM_BUILD_DIR=$LLVM_SOURCE_DIR/build-shared
@@ -54,3 +38,34 @@ RUN cmake -C /tmp/LinuxHardeningCache.cmake -G Ninja -S llvm -B $LLVM_BUILD_DIR 
     -DLLVM_TARGETS_TO_BUILD="host"
 
 RUN ninja -C $LLVM_BUILD_DIR
+
+WORKDIR /sources/
+
+#  ==== tilelang-ascend install ====
+# (pin commit on 2026/06/05) https://github.com/tile-ai/tilelang-ascend/commit/b16554dd7a21ba52cbac2a125e5d1cc476838f53
+# include A5 CA support
+ARG TILELANG_ASCEND_COMMIT=b16554dd7a21ba52cbac2a125e5d1cc476838f53
+RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
+WORKDIR /sources/tilelang-ascend
+
+RUN git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
+RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
+#  ==== end of tilelang-ascend install ====
+
+WORKDIR /sources/
+
+# github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+RUN mkdir -p -m 755 /etc/apt/keyrings \
+	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& mkdir -p -m 755 /etc/apt/sources.list.d \
+	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+	&& apt update \
+	&& apt install gh -y
+
+# ==== AI agent CLIs (install last for better layer caching) ====
+
+# cursor CLI
+RUN curl -fsSL https://cursor.com/install | bash \
+    && ln -sf /root/.local/bin/agent /usr/local/bin/agent

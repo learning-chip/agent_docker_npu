@@ -69,3 +69,5 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
 # cursor CLI
 RUN curl -fsSL https://cursor.com/install | bash \
     && ln -sf /root/.local/bin/agent /usr/local/bin/agent
+
+# TODO: add OpenCode CLI

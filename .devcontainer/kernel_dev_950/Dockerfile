@@ -70,4 +70,6 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
 RUN curl -fsSL https://cursor.com/install | bash \
     && ln -sf /root/.local/bin/agent /usr/local/bin/agent
 
-# TODO: add OpenCode CLI
+# OpenCode CLI https://opencode.ai
+RUN curl -fsSL https://opencode.ai/install | bash \
+    && ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode

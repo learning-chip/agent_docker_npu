@@ -43,7 +43,7 @@ WORKDIR /sources/
 
 #  ==== tilelang-ascend install ====
 # (pin commit on 2026/06/05) https://github.com/tile-ai/tilelang-ascend/commit/b16554dd7a21ba52cbac2a125e5d1cc476838f53
-# include A5 CA support
+# include A5 CA support https://github.com/tile-ai/tilelang-ascend/pull/1116
 ARG TILELANG_ASCEND_COMMIT=b16554dd7a21ba52cbac2a125e5d1cc476838f53
 RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
 WORKDIR /sources/tilelang-ascend

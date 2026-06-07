@@ -73,3 +73,4 @@ RUN curl -fsSL https://cursor.com/install | bash \
 # OpenCode CLI https://opencode.ai
 RUN curl -fsSL https://opencode.ai/install | bash \
     && ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
+COPY opencode/opencode.json /root/.config/opencode/opencode.json

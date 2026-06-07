@@ -6,12 +6,17 @@ Docker image for NPU kernel development
 docker build -t agent_npu_cann_950:9.0.0 .
 ```
 
+## Environment variables
+
+- `API_KEY_DASHSCOPE` — DashScope API key for OpenCode (`qwen3.7-max` via compatible-mode endpoint)
+
 ## Run container directly (optional)
 
 ```bash
 HOST_MOUNT_DIR=$HOME/work_code/workdir_for_agent  # do not let agent access other files
 
 docker run --rm -it --ipc=host --privileged \
+    -e API_KEY_DASHSCOPE=$API_KEY_DASHSCOPE \
     --device=/dev/davinci0 --device=/dev/davinci1 \
     --device=/dev/davinci2 --device=/dev/davinci3 \
     --device=/dev/davinci4 --device=/dev/davinci5 \
@@ -31,6 +36,7 @@ docker run --rm -it --ipc=host --privileged \
 ```bash
 # if just running host-side CA model, no need to mount device
 docker run --rm -it \
+    -e API_KEY_DASHSCOPE=$API_KEY_DASHSCOPE \
     -v $HOME/work_code/workdir_for_agent:/workdir \
     -w /workdir \
     agent_npu_cann_950:9.0.0 /bin/bash

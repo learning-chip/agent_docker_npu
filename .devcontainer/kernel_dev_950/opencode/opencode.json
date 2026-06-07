@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "permission": "allow",
   "model": "dashscope/qwen3.7-max",
   "enabled_providers": ["dashscope"],
   "provider": {

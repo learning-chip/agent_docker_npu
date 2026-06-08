@@ -66,11 +66,19 @@ RUN mkdir -p -m 755 /etc/apt/keyrings \
 
 # ==== AI agent CLIs (install last for better layer caching) ====
 
+# Node.js (opencode-goal-plugin requires >=18)
+ARG NODE_MAJOR=20
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
 # cursor CLI
 RUN curl -fsSL https://cursor.com/install | bash \
     && ln -sf /root/.local/bin/agent /usr/local/bin/agent
 
 # OpenCode CLI https://opencode.ai
+# Goal plugin https://github.com/willytop8/OpenCode-goal-plugin
 RUN curl -fsSL https://opencode.ai/install | bash \
     && ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
 COPY opencode/opencode.json /root/.config/opencode/opencode.json
+RUN opencode plugin opencode-goal-plugin -g -f

@@ -18,37 +18,37 @@ RUN pip install --no-cache-dir \
     pytest 'pybind11<3' nanobind setuptools wheel auditwheel \
     ipython jupyterlab matplotlib pandas
 
-# pre-built MLIR for ptoas & dsl development
-ENV WORKSPACE_DIR=/llvm-workspace
-ENV LLVM_SOURCE_DIR=$WORKSPACE_DIR/llvm-project
-ENV LLVM_BUILD_DIR=$LLVM_SOURCE_DIR/build-shared
-ARG LLVM_TAG=llvmorg-19.1.7
+# # pre-built MLIR for ptoas & dsl development
+# ENV WORKSPACE_DIR=/llvm-workspace
+# ENV LLVM_SOURCE_DIR=$WORKSPACE_DIR/llvm-project
+# ENV LLVM_BUILD_DIR=$LLVM_SOURCE_DIR/build-shared
+# ARG LLVM_TAG=llvmorg-19.1.7
 
-WORKDIR $WORKSPACE_DIR
-RUN git clone --depth 1 --branch ${LLVM_TAG} https://github.com/llvm/llvm-project.git
+# WORKDIR $WORKSPACE_DIR
+# RUN git clone --depth 1 --branch ${LLVM_TAG} https://github.com/llvm/llvm-project.git
 
-COPY cmake/LinuxHardeningCache.cmake /tmp/LinuxHardeningCache.cmake
-WORKDIR $LLVM_SOURCE_DIR
-RUN cmake -C /tmp/LinuxHardeningCache.cmake -G Ninja -S llvm -B $LLVM_BUILD_DIR \
-    -DLLVM_ENABLE_PROJECTS="mlir;clang" \
-    -DBUILD_SHARED_LIBS=ON \
-    -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
-    -DPython3_EXECUTABLE="$(which python)" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_TARGETS_TO_BUILD="host"
+# COPY cmake/LinuxHardeningCache.cmake /tmp/LinuxHardeningCache.cmake
+# WORKDIR $LLVM_SOURCE_DIR
+# RUN cmake -C /tmp/LinuxHardeningCache.cmake -G Ninja -S llvm -B $LLVM_BUILD_DIR \
+#     -DLLVM_ENABLE_PROJECTS="mlir;clang" \
+#     -DBUILD_SHARED_LIBS=ON \
+#     -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
+#     -DPython3_EXECUTABLE="$(which python)" \
+#     -DCMAKE_BUILD_TYPE=Release \
+#     -DLLVM_TARGETS_TO_BUILD="host"
 
-RUN ninja -C $LLVM_BUILD_DIR
+# RUN ninja -C $LLVM_BUILD_DIR
 
-WORKDIR /sources/
+# WORKDIR /sources/
 
-#  ==== tilelang-ascend install ====
-# (pin commit on 2026/05/28) https://github.com/tile-ai/tilelang-ascend/commit/5cdf29200ca8b54a5cc4c98382b434d092ee8e2b
-ARG TILELANG_ASCEND_COMMIT=5cdf29200ca8b54a5cc4c98382b434d092ee8e2b
-RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
-WORKDIR /sources/tilelang-ascend
+# #  ==== tilelang-ascend install ====
+# # (pin commit on 2026/05/28) https://github.com/tile-ai/tilelang-ascend/commit/5cdf29200ca8b54a5cc4c98382b434d092ee8e2b
+# ARG TILELANG_ASCEND_COMMIT=5cdf29200ca8b54a5cc4c98382b434d092ee8e2b
+# RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
+# WORKDIR /sources/tilelang-ascend
 
-RUN git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
-RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
+# RUN git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
+# RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
 #  ==== end of tilelang-ascend install ====
 
 WORKDIR /sources/

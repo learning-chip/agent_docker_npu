@@ -82,12 +82,12 @@ RUN curl -fsSL https://opencode.ai/install | bash \
 COPY opencode/opencode.json /root/.config/opencode/opencode.json
 RUN opencode plugin opencode-goal-plugin -g -f
 
-# ChatGPT Code CLI https://chatgpt.com/codex/
-# (pin version on 2026/06/01) verified with Humanize hooks via `hooks` feature
-ARG CODEX_VERSION=0.136.0
-RUN CODEX_NON_INTERACTIVE=1 CODEX_RELEASE=${CODEX_VERSION} curl -fsSL https://chatgpt.com/codex/install.sh | bash \
-    && ln -sf /root/.local/bin/codex /usr/local/bin/codex
-RUN export PATH="/root/.local/bin:${PATH}" \
-    && which codex \
-    && codex --version | grep -F "codex-cli ${CODEX_VERSION}"
-COPY codex/config.toml /root/.codex/config.toml
+# # ChatGPT Code CLI https://chatgpt.com/codex/
+# # (pin version on 2026/06/01) verified with Humanize hooks via `hooks` feature
+# ARG CODEX_VERSION=0.136.0
+# RUN CODEX_NON_INTERACTIVE=1 CODEX_RELEASE=${CODEX_VERSION} curl -fsSL https://chatgpt.com/codex/install.sh | bash \
+#     && ln -sf /root/.local/bin/codex /usr/local/bin/codex
+# RUN export PATH="/root/.local/bin:${PATH}" \
+#     && which codex \
+#     && codex --version | grep -F "codex-cli ${CODEX_VERSION}"
+# COPY codex/config.toml /root/.codex/config.toml

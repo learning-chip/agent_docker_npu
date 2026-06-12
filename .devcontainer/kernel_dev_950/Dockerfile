@@ -39,18 +39,18 @@ RUN pip install --no-cache-dir torch==2.9.0 --index-url https://download.pytorch
 
 # RUN ninja -C $LLVM_BUILD_DIR
 
-WORKDIR /sources/
+# WORKDIR /sources/
 
-#  ==== tilelang-ascend install ====
-# (pin commit on 2026/06/05) https://github.com/tile-ai/tilelang-ascend/commit/b16554dd7a21ba52cbac2a125e5d1cc476838f53
-# include A5 CA support https://github.com/tile-ai/tilelang-ascend/pull/1116
-ARG TILELANG_ASCEND_COMMIT=b16554dd7a21ba52cbac2a125e5d1cc476838f53
-RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
-WORKDIR /sources/tilelang-ascend
+# #  ==== tilelang-ascend install ====
+# # (pin commit on 2026/06/05) https://github.com/tile-ai/tilelang-ascend/commit/b16554dd7a21ba52cbac2a125e5d1cc476838f53
+# # include A5 CA support https://github.com/tile-ai/tilelang-ascend/pull/1116
+# ARG TILELANG_ASCEND_COMMIT=b16554dd7a21ba52cbac2a125e5d1cc476838f53
+# RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
+# WORKDIR /sources/tilelang-ascend
 
-RUN git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
-RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
-#  ==== end of tilelang-ascend install ====
+# RUN git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
+# RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
+# #  ==== end of tilelang-ascend install ====
 
 WORKDIR /sources/
 

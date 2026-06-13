@@ -82,3 +82,8 @@ RUN curl -fsSL https://opencode.ai/install | bash \
     && ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
 COPY opencode/opencode.json /root/.config/opencode/opencode.json
 RUN opencode plugin opencode-goal-plugin -g -f
+
+# ChatGPT Codex CLI https://chatgpt.com/codex/
+RUN CODEX_NON_INTERACTIVE=1 curl -fsSL https://chatgpt.com/codex/install.sh | bash \
+    && ln -sf /root/.local/bin/codex /usr/local/bin/codex
+COPY codex/config.toml /root/.codex/config.toml

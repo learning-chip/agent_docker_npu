@@ -9,6 +9,7 @@ docker build -t agent_npu_cann_950:9.0.0 .
 ## Environment variables
 
 - `API_KEY_DASHSCOPE` — DashScope API key for OpenCode (`qwen3.7-max` via compatible-mode endpoint)
+- `OPENAI_API_KEY` — API key for Codex (RightCode provider)
 
 ## Run container directly (optional)
 
@@ -37,6 +38,7 @@ docker run --rm -it --ipc=host --privileged \
 # if just running host-side CA model, no need to mount device
 docker run --rm -it \
     -e API_KEY_DASHSCOPE=$API_KEY_DASHSCOPE \
+    -e OPENAI_API_KEY=$OPENAI_API_KEY \
     -v $HOME/work_code/workdir_for_agent:/workdir \
     -w /workdir \
     agent_npu_cann_950:9.0.0 /bin/bash

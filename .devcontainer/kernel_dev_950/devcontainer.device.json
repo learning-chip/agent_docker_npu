@@ -1,6 +1,6 @@
 {
   "name": "agent_npu_kernel_950",
-  "image": "agent_npu_cann_950:9.0.0",
+  "image": "agent_npu_cann_950:9.1.0-beta.1",
   "workspaceFolder": "/workdir",
   "runArgs": [
     "--ipc=host",

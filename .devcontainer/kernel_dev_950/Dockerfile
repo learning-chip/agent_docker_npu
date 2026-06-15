@@ -1,4 +1,4 @@
-FROM quay.io/ascend/cann:9.0.0-950-ubuntu22.04-py3.11
+FROM quay.io/ascend/cann:9.1.0-beta.1-950-ubuntu22.04-py3.12
 
 RUN apt-get update && apt-get install -y \
     wget curl git vim gawk ripgrep \

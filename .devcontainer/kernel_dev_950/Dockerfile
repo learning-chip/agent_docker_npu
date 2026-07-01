@@ -11,46 +11,34 @@ RUN pip install --no-cache-dir torch==2.9.0 --index-url https://download.pytorch
     && pip install --no-cache-dir torch-npu==2.9.0.post2 \
     && pip install --no-cache-dir numpy pyyaml
 
-# # extra util
-# # LLVM/MLIR Python bindings are not yet compatible with pybind11 3.x
-# # (see pybind11 static_assert on def_property + keep_alive).
-# RUN pip install --no-cache-dir \
-#     pytest 'pybind11<3' nanobind setuptools wheel auditwheel \
-#     ipython jupyterlab matplotlib pandas
+# extra util
+# LLVM/MLIR Python bindings are not yet compatible with pybind11 3.x
+# (see pybind11 static_assert on def_property + keep_alive).
+RUN pip install --no-cache-dir \
+    pytest 'pybind11<3' nanobind setuptools wheel auditwheel \
+    ipython jupyterlab matplotlib pandas
 
-# # pre-built MLIR for ptoas & dsl development
-# ENV WORKSPACE_DIR=/llvm-workspace
-# ENV LLVM_SOURCE_DIR=$WORKSPACE_DIR/llvm-project
-# ENV LLVM_BUILD_DIR=$LLVM_SOURCE_DIR/build-shared
-# ARG LLVM_TAG=llvmorg-19.1.7
+# pre-built MLIR for ptoas & dsl development
+ENV WORKSPACE_DIR=/llvm-workspace
+ENV LLVM_SOURCE_DIR=$WORKSPACE_DIR/llvm-project
+ENV LLVM_BUILD_DIR=$LLVM_SOURCE_DIR/build-shared
+ARG LLVM_REPO=https://github.com/vpto-dev/llvm-project.git
+ARG LLVM_REF=feature-vpto
 
-# WORKDIR $WORKSPACE_DIR
-# RUN git clone --depth 1 --branch ${LLVM_TAG} https://github.com/llvm/llvm-project.git
+WORKDIR $WORKSPACE_DIR
+RUN git clone --depth 1 --branch ${LLVM_REF} ${LLVM_REPO} llvm-project
 
-# COPY cmake/LinuxHardeningCache.cmake /tmp/LinuxHardeningCache.cmake
-# WORKDIR $LLVM_SOURCE_DIR
-# RUN cmake -C /tmp/LinuxHardeningCache.cmake -G Ninja -S llvm -B $LLVM_BUILD_DIR \
-#     -DLLVM_ENABLE_PROJECTS="mlir;clang" \
-#     -DBUILD_SHARED_LIBS=ON \
-#     -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
-#     -DPython3_EXECUTABLE="$(which python)" \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     -DLLVM_TARGETS_TO_BUILD="host"
+COPY cmake/LinuxHardeningCache.cmake /tmp/LinuxHardeningCache.cmake
+WORKDIR $LLVM_SOURCE_DIR
+RUN cmake -C /tmp/LinuxHardeningCache.cmake -G Ninja -S llvm -B $LLVM_BUILD_DIR \
+    -DLLVM_ENABLE_PROJECTS="mlir;clang" \
+    -DBUILD_SHARED_LIBS=ON \
+    -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
+    -DPython3_EXECUTABLE="$(which python)" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_TARGETS_TO_BUILD="host"
 
-# RUN ninja -C $LLVM_BUILD_DIR
-
-# WORKDIR /sources/
-
-# #  ==== tilelang-ascend install ====
-# # (pin commit on 2026/06/05) https://github.com/tile-ai/tilelang-ascend/commit/b16554dd7a21ba52cbac2a125e5d1cc476838f53
-# # include A5 CA support https://github.com/tile-ai/tilelang-ascend/pull/1116
-# ARG TILELANG_ASCEND_COMMIT=b16554dd7a21ba52cbac2a125e5d1cc476838f53
-# RUN git clone --recursive https://github.com/tile-ai/tilelang-ascend.git
-# WORKDIR /sources/tilelang-ascend
-
-# RUN git checkout $TILELANG_ASCEND_COMMIT && bash install_ascend.sh
-# RUN echo "source /sources/tilelang-ascend/set_env.sh" >> ~/.bashrc
-# #  ==== end of tilelang-ascend install ====
+RUN ninja -C $LLVM_BUILD_DIR
 
 WORKDIR /sources/
 

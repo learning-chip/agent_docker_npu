@@ -3,7 +3,7 @@ Docker image for NPU kernel development
 ## Build image
 
 ```bash
-docker build -t agent_npu_cann_950:9.0.0 .
+docker build -t agent_npu_cann_950:9.1.0-beta.1 .
 ```
 
 ## Environment variables
@@ -30,7 +30,7 @@ docker run --rm -it --ipc=host --privileged \
     -v /etc/ascend_install.info:/etc/ascend_install.info:ro \
     -v $HOST_MOUNT_DIR:/workdir \
     -w /workdir \
-    agent_npu_cann_950:9.0.0 /bin/bash
+    agent_npu_cann_950:9.1.0-beta.1 /bin/bash
 ```
 
 
@@ -41,5 +41,5 @@ docker run --rm -it \
     -e OPENAI_API_KEY=$OPENAI_API_KEY \
     -v $HOME/work_code/workdir_for_agent:/workdir \
     -w /workdir \
-    agent_npu_cann_950:9.0.0 /bin/bash
+    agent_npu_cann_950:9.1.0-beta.1 /bin/bash
 ```

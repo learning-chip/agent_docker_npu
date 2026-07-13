@@ -19,11 +19,16 @@ RUN pip install --no-cache-dir \
     ipython jupyterlab matplotlib pandas
 
 # pre-built MLIR for ptoas & dsl development
+# Build variants (pass --build-arg LLVM_REF=...):
+#   feature-vpto        -> agent_npu:cann_950_9.0.0_vpto_llvm19
+#   feature-vpto-llvm21 -> agent_npu:cann_950_9.0.0_vpto_llvm21
 ENV WORKSPACE_DIR=/llvm-workspace
 ENV LLVM_SOURCE_DIR=$WORKSPACE_DIR/llvm-project
 ENV LLVM_BUILD_DIR=$LLVM_SOURCE_DIR/build-shared
 ARG LLVM_REPO=https://github.com/vpto-dev/llvm-project.git
 ARG LLVM_REF=feature-vpto
+ENV LLVM_REPO=${LLVM_REPO}
+ENV LLVM_REF=${LLVM_REF}
 
 WORKDIR $WORKSPACE_DIR
 RUN git clone --depth 1 --branch ${LLVM_REF} ${LLVM_REPO} llvm-project
@@ -35,6 +40,8 @@ RUN cmake -C /tmp/LinuxHardeningCache.cmake -G Ninja -S llvm -B $LLVM_BUILD_DIR 
     -DBUILD_SHARED_LIBS=ON \
     -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
     -DPython3_EXECUTABLE="$(which python)" \
+    -Dpybind11_DIR="$(python -m pybind11 --cmakedir)" \
+    -Dnanobind_DIR="$(python -m nanobind --cmake_dir)" \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_TARGETS_TO_BUILD="host"
 

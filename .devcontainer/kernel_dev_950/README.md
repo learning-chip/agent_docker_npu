@@ -1,10 +1,20 @@
 Docker image for NPU kernel development
 
-## Build image
+## Build images
+
+Two LLVM variants are available from the same Dockerfile:
 
 ```bash
-docker build -t agent_npu_cann_950:9.0.0 .
+# LLVM 19 (vpto-dev/llvm-project:feature-vpto) — for PTOAS main branch
+docker build --build-arg LLVM_REF=feature-vpto \
+  -t agent_npu:cann_950_9.0.0_vpto_llvm19 .
+
+# LLVM 21 (vpto-dev/llvm-project:feature-vpto-llvm21) — for PTOAS feature-vmi
+docker build --build-arg LLVM_REF=feature-vpto-llvm21 \
+  -t agent_npu:cann_950_9.0.0_vpto_llvm21 .
 ```
+
+`devcontainer.host-ca.json` uses the LLVM 21 image by default.
 
 ## Environment variables
 
@@ -30,9 +40,10 @@ docker run --rm -it --ipc=host --privileged \
     -v /etc/ascend_install.info:/etc/ascend_install.info:ro \
     -v $HOST_MOUNT_DIR:/workdir \
     -w /workdir \
-    agent_npu_cann_950:9.0.0 /bin/bash
+    agent_npu:cann_950_9.0.0_vpto_llvm21 /bin/bash
 ```
 
+Use `agent_npu:cann_950_9.0.0_vpto_llvm19` instead when working against PTOAS `main`.
 
 ```bash
 # if just running host-side CA model, no need to mount device
@@ -41,5 +52,5 @@ docker run --rm -it \
     -e OPENAI_API_KEY=$OPENAI_API_KEY \
     -v $HOME/work_code/workdir_for_agent:/workdir \
     -w /workdir \
-    agent_npu_cann_950:9.0.0 /bin/bash
+    agent_npu:cann_950_9.0.0_vpto_llvm21 /bin/bash
 ```

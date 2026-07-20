@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow",
+  "model": "dashscope/glm-5.2",
+  "enabled_providers": ["dashscope"],
+  "plugin": ["opencode-goal-plugin"],
+  "command": {
+    "goal": {
+      "description": "Set a session-scoped goal and auto-continue until complete.",
+      "template": "$ARGUMENTS",
+      "agent": "build"
+    }
+  },
+  "provider": {
+    "dashscope": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "DashScope",
+      "options": {
+        "baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "apiKey": "{env:API_KEY_DASHSCOPE}"
+      },
+      "models": {
+        "glm-5.2": {
+          "id": "glm-5.2",
+          "name": "GLM 5.2",
+          "reasoning": true,
+          "options": {
+            "enable_thinking": true,
+            "reasoning_effort": "high"
+          }
+        },
+        "glm-5.1": {
+          "id": "glm-5.1",
+          "name": "GLM 5.1",
+          "reasoning": true
+        }
+      }
+    }
+  }
+}

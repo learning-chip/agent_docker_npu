@@ -1,0 +1,11 @@
+{
+  "name": "agent_npu_kernel_950_host_ca",
+  "image": "agent_npu:cann_950_9.0.0_vpto_llvm21",
+  "workspaceFolder": "/workdir",
+  "containerEnv": {
+    "API_KEY_DASHSCOPE": "${localEnv:API_KEY_DASHSCOPE}"
+  },
+  "mounts": [
+    "type=bind,source=${localEnv:HOME}/work_code/workdir_for_agent,target=/workdir"
+  ]
+}

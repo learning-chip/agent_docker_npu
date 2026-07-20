@@ -1,7 +1,7 @@
 FROM quay.io/ascend/cann:9.0.0-950-ubuntu22.04-py3.11
 
 RUN apt-get update && apt-get install -y \
-    wget curl git vim \
+    wget curl git vim gawk ripgrep \
     ninja-build cmake ccache build-essential lld zip binutils patchelf chrpath \
     && rm -rf /var/lib/apt/lists/*
 
@@ -18,30 +18,20 @@ RUN pip install --no-cache-dir \
     pytest 'pybind11<3' nanobind setuptools wheel auditwheel \
     ipython jupyterlab matplotlib pandas
 
-# cursor CLI
-RUN apt-get update && apt-get install -y curl \
-    && curl -fsSL https://cursor.com/install | bash \
-    && ln -sf /root/.local/bin/agent /usr/local/bin/agent
-
-# github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-RUN apt update && apt install wget -y \
-	&& mkdir -p -m 755 /etc/apt/keyrings \
-	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
-	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
-	&& mkdir -p -m 755 /etc/apt/sources.list.d \
-	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-	&& apt update \
-	&& apt install gh -y
-
-# pre-built MLIR for ptoas & dsl development 
+# pre-built MLIR for ptoas & dsl development
+# Build variants (pass --build-arg LLVM_REF=...):
+#   feature-vpto        -> agent_npu:cann_950_9.0.0_vpto_llvm19
+#   feature-vpto-llvm21 -> agent_npu:cann_950_9.0.0_vpto_llvm21
 ENV WORKSPACE_DIR=/llvm-workspace
 ENV LLVM_SOURCE_DIR=$WORKSPACE_DIR/llvm-project
 ENV LLVM_BUILD_DIR=$LLVM_SOURCE_DIR/build-shared
-ARG LLVM_TAG=llvmorg-19.1.7
+ARG LLVM_REPO=https://github.com/vpto-dev/llvm-project.git
+ARG LLVM_REF=feature-vpto
+ENV LLVM_REPO=${LLVM_REPO}
+ENV LLVM_REF=${LLVM_REF}
 
 WORKDIR $WORKSPACE_DIR
-RUN git clone --depth 1 --branch ${LLVM_TAG} https://github.com/llvm/llvm-project.git
+RUN git clone --depth 1 --branch ${LLVM_REF} ${LLVM_REPO} llvm-project
 
 COPY cmake/LinuxHardeningCache.cmake /tmp/LinuxHardeningCache.cmake
 WORKDIR $LLVM_SOURCE_DIR
@@ -50,7 +40,45 @@ RUN cmake -C /tmp/LinuxHardeningCache.cmake -G Ninja -S llvm -B $LLVM_BUILD_DIR 
     -DBUILD_SHARED_LIBS=ON \
     -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
     -DPython3_EXECUTABLE="$(which python)" \
+    -Dpybind11_DIR="$(python -m pybind11 --cmakedir)" \
+    -Dnanobind_DIR="$(python -m nanobind --cmake_dir)" \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_TARGETS_TO_BUILD="host"
 
 RUN ninja -C $LLVM_BUILD_DIR
+
+WORKDIR /sources/
+
+# github cli https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+RUN mkdir -p -m 755 /etc/apt/keyrings \
+	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& mkdir -p -m 755 /etc/apt/sources.list.d \
+	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |  tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+	&& apt update \
+	&& apt install gh -y
+
+# ==== AI agent CLIs (install last for better layer caching) ====
+
+# Node.js (opencode-goal-plugin requires >=18)
+ARG NODE_MAJOR=20
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# cursor CLI
+RUN curl -fsSL https://cursor.com/install | bash \
+    && ln -sf /root/.local/bin/agent /usr/local/bin/agent
+
+# OpenCode CLI https://opencode.ai
+# Goal plugin https://github.com/willytop8/OpenCode-goal-plugin
+RUN curl -fsSL https://opencode.ai/install | bash \
+    && ln -sf /root/.opencode/bin/opencode /usr/local/bin/opencode
+COPY opencode/opencode.json /root/.config/opencode/opencode.json
+RUN opencode plugin opencode-goal-plugin -g -f
+
+# ChatGPT Codex CLI https://chatgpt.com/codex/
+RUN CODEX_NON_INTERACTIVE=1 curl -fsSL https://chatgpt.com/codex/install.sh | bash \
+    && ln -sf /root/.local/bin/codex /usr/local/bin/codex
+COPY codex/config.toml /root/.codex/config.toml

@@ -1,6 +1,6 @@
 {
-  "name": "vllm_ascend_dev",
-  "image": "vllm_ascend_dev:v0.18.0rc1",
+  "name": "vllm_ascend_dev_v0.19.1rc1",
+  "image": "vllm_ascend_dev:v0.19.1rc1",
   "workspaceFolder": "/workdir",
   "runArgs": [
     "--ipc=host",
